@@ -4,17 +4,20 @@ INSERT INTO users (name, email, role) VALUES
   ('Luis Ramírez', 'luis@parkly.local', 'Cajero')
 ON CONFLICT (email) DO NOTHING;
 
-INSERT INTO clients (name, phone, email, agreement, monthly_fee, monthly_until) VALUES
-  ('María Fernanda López', '555 018 2440', 'maria.lopez@email.com', 'Mensualidad individual', 1450, CURRENT_DATE + INTERVAL '30 days'),
-  ('Carlos Mendoza Ruiz', '555 013 8702', 'c.mendoza@email.com', 'Convenio individual', 1450, CURRENT_DATE + INTERVAL '14 days'),
-  ('Andrea Salas', '555 019 5401', 'andrea.salas@email.com', 'Mensualidad individual', 1600, CURRENT_DATE - INTERVAL '4 days'),
-  ('Grupo Cobalto', '555 010 8891', 'flotilla@cobalto.com', 'Convenio flotilla', 5200, CURRENT_DATE + INTERVAL '35 days')
-ON CONFLICT DO NOTHING;
+INSERT INTO clients (name, phone, email, agreement, monthly_fee, monthly_until)
+SELECT seed.name, seed.phone, seed.email, seed.agreement, seed.monthly_fee, seed.monthly_until
+FROM (VALUES
+  ('María Fernanda López', '555 018 2440', 'maria.lopez@email.com', 'Mensualidad individual', 1450::NUMERIC, CURRENT_DATE + INTERVAL '30 days'),
+  ('Carlos Mendoza Ruiz', '555 013 8702', 'c.mendoza@email.com', 'Convenio individual', 1450::NUMERIC, CURRENT_DATE + INTERVAL '14 days'),
+  ('Andrea Salas', '555 019 5401', 'andrea.salas@email.com', 'Mensualidad individual', 1600::NUMERIC, CURRENT_DATE - INTERVAL '4 days'),
+  ('Grupo Cobalto', '555 010 8891', 'flotilla@cobalto.com', 'Convenio flotilla', 5200::NUMERIC, CURRENT_DATE + INTERVAL '35 days')
+) AS seed(name, phone, email, agreement, monthly_fee, monthly_until)
+WHERE NOT EXISTS (SELECT 1 FROM clients existing WHERE existing.name = seed.name);
 
 INSERT INTO vehicles (plate, brand, model, color, vehicle_type, client_id) VALUES
-  ('ABC-123-A', 'Toyota', 'Corolla', 'Gris', 'Auto', (SELECT id FROM clients WHERE name = 'María Fernanda López')),
-  ('JKL-456-B', 'Honda', 'CB 190', 'Negro', 'Moto', (SELECT id FROM clients WHERE name = 'Carlos Mendoza Ruiz')),
-  ('MNO-789-C', 'Nissan', 'NP300', 'Blanco', 'Camioneta', (SELECT id FROM clients WHERE name = 'Grupo Cobalto')),
+  ('ABC-123-A', 'Toyota', 'Corolla', 'Gris', 'Auto', (SELECT id FROM clients WHERE name = 'María Fernanda López' ORDER BY id LIMIT 1)),
+  ('JKL-456-B', 'Honda', 'CB 190', 'Negro', 'Moto', (SELECT id FROM clients WHERE name = 'Carlos Mendoza Ruiz' ORDER BY id LIMIT 1)),
+  ('MNO-789-C', 'Nissan', 'NP300', 'Blanco', 'Camioneta', (SELECT id FROM clients WHERE name = 'Grupo Cobalto' ORDER BY id LIMIT 1)),
   ('XYZ-552-D', 'Mazda', '3', 'Rojo', 'Auto', NULL)
 ON CONFLICT (plate) DO NOTHING;
 

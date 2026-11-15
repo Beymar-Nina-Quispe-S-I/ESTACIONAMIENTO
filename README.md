@@ -7,24 +7,39 @@ Sistema administrativo web con React, Bootstrap, Node.js, Express y PostgreSQL. 
 - Node.js 20.19+ o 22.12+
 - PostgreSQL 14+
 
-## Instalación
+## Instalación en Windows
 
-1. Crea una base de datos en PostgreSQL llamada `estacionamiento`.
-2. Copia `server/.env.example` a `server/.env` y configura `DATABASE_URL` con tu usuario y contraseña de PostgreSQL.
-3. Instala las dependencias desde la raíz y las del servidor:
+1. Instala PostgreSQL desde [postgresql.org/download/windows](https://www.postgresql.org/download/windows/). En el instalador deja el puerto `5432` y anota la clave que definas para el usuario `postgres`.
+2. Abre pgAdmin y conéctate al servidor local. Crea una base de datos llamada `estacionamiento` (clic derecho en **Databases > Create > Database**).
+3. En pgAdmin selecciona la base `estacionamiento`, abre **Tools > Query Tool** y ejecuta el contenido de [`server/sql/instalacion_postgres.sql`](server/sql/instalacion_postgres.sql). Esto crea las tablas y relaciones y carga registros iniciales. También puedes copiar/pegar el archivo completo en Query Tool.
+4. Copia `server/.env.example` como `server/.env` y completa tus datos:
+
+```env
+PORT=3000
+PGHOST=localhost
+PGPORT=5432
+PGDATABASE=estacionamiento
+PGUSER=postgres
+PGPASSWORD=la_clave_que_definiste_en_el_instalador
+PARKING_RATE_PER_HOUR=5
+```
+
+`PGHOST` es el servidor, `PGPORT` el puerto de PostgreSQL, `PGDATABASE` el nombre de la base, `PGUSER` el usuario y `PGPASSWORD` la clave. No compartas ni subas `server/.env` a Git. Si prefieres una URL única, puedes configurar `DATABASE_URL=postgresql://postgres:tu_clave@localhost:5432/estacionamiento` en vez de los cinco campos `PG...`.
+
+5. Instala las dependencias desde la raíz y las del servidor:
 
 ```powershell
 npm install
 npm install --prefix server
 ```
 
-4. Crea las tablas y carga registros iniciales:
+6. Alternativamente, en lugar de ejecutar el SQL desde pgAdmin, crea la base en pgAdmin y deja que el script configure tablas y datos:
 
 ```powershell
 npm run server:setup
 ```
 
-5. Inicia el servidor API y Vite en dos terminales:
+7. Inicia el servidor API y Vite en dos terminales:
 
 ```powershell
 npm run server
@@ -55,7 +70,7 @@ Después selecciona la base `estacionamiento`, abre **Query Tool** y copia/ejecu
 psql -U postgres -d estacionamiento -f server/sql/instalacion_postgres.sql
 ```
 
-Para el servidor Node, configura `DATABASE_URL` en `server/.env` y ejecuta `npm run server`.
+Para el servidor Node, configura `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER` y `PGPASSWORD` en `server/.env` (o configura `DATABASE_URL`) y ejecuta `npm run server`.
 
 ## Arquitectura
 
